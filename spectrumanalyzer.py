@@ -3,6 +3,7 @@ import numpy as np
 #import librosa
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.patches as patches
 
 import sys, os, argparse
 
@@ -43,13 +44,18 @@ def plot_spec(i, data, sr, windowtype, windowsize, axes):
 
     axes[0].cla()
     axes[1].cla()
+    axes[2].cla()
 
     data_windowed = window_func(windowsize) * data[i:i+windowsize]
 
     fft, freq = calc_fft(data_windowed, sr)
     
-    axes[0].plot(data_windowed)
-    axes[1].plot(freq, np.abs(fft))
+    r = patches.Rectangle(xy=(i, 0), width=100, height=data.max(), ec="red", fill=False)
+
+    axes[0].plot(data)
+    axes[0].add_patch(r)
+    axes[1].plot(data_windowed)
+    axes[2].plot(freq, np.abs(fft))
     axes[0].set_title('i=' + str(i))
 
     return freq, fft
@@ -68,7 +74,7 @@ def main(args):
 
     N = len(data)
 
-    fig, axes = plt.subplots(2, 1, figsize=[12, 8])
+    fig, axes = plt.subplots(3, 1, figsize=[8, 8])
     ani = animation.FuncAnimation(fig, plot_spec, fargs = (data, sr, windowtype, windowsize, axes), interval=1000/16, frames=N-windowsize)
     plt.show()
 
