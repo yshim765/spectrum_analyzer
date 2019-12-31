@@ -29,35 +29,29 @@ def calc_fft(data, sr):
     return fft, freq
 
 
-def plot_spec(i, data, sr, windowtype, windowsize, axes):
+def plot_spec(i, data, sr, window_func, windowsize, axes):
     """
     data: series, spectrum data
     """
-
-    window_dict = {
-        "hamming":np.hamming,
-        "hanning":np.hanning,
-        "rectangule":(lambda x: np.ones(x))
-    }
-
-    window_func = window_dict[windowtype]
-
-    axes[0].cla()
-    axes[1].cla()
-    axes[2].cla()
 
     data_windowed = window_func(windowsize) * data[i:i+windowsize]
 
     fft, freq = calc_fft(data_windowed, sr)
     
-    r = patches.Rectangle(xy=(i, 0), width=100, height=data.max(), ec="red", fill=False)
+    axes[0].cla()
+    axes[1].cla()
+    axes[2].cla()
 
-    axes[0].plot(data)
-    axes[0].add_patch(r)
-    axes[1].plot(data_windowed)
-    axes[2].plot(freq, np.abs(fft))
     axes[0].set_title('i=' + str(i))
+    axes[0].plot(data, zorder=1)
 
+    r = patches.Rectangle(xy=(i, 0), width=windowsize, height=data.max(), ec="red", fill=False, zorder=2)
+    axes[0].add_patch(r)
+
+    axes[1].plot(data_windowed)
+    
+    axes[2].plot(freq, np.abs(fft))
+    
     return freq, fft
 
 def main(args):
@@ -72,10 +66,18 @@ def main(args):
 
     data = read_data(path, sr)
 
+    window_dict = {
+        "hamming":np.hamming,
+        "hanning":np.hanning,
+        "rectangule":(lambda x: np.ones(x))
+    }
+
+    window_func = window_dict[windowtype]
+
     N = len(data)
 
     fig, axes = plt.subplots(3, 1, figsize=[8, 8])
-    ani = animation.FuncAnimation(fig, plot_spec, fargs = (data, sr, windowtype, windowsize, axes), interval=1000/16, frames=N-windowsize)
+    ani = animation.FuncAnimation(fig, plot_spec, fargs = (data, sr, window_func, windowsize, axes), interval=1000/16, frames=N-windowsize)
     plt.show()
 
 if __name__ == "__main__":
