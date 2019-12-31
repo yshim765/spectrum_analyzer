@@ -1,18 +1,20 @@
 import pandas as pd
 import numpy as np
-import librosa
+#import librosa
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-import sys, argparse
+import sys, os, argparse
 
 def read_data(path, sr):
-    data = pd.Series([np.sin(2*np.pi*x/10) + np.sin(2*np.pi*x/50) for x in range(1, 131)] +\
-                    [np.sin(2*np.pi*x/5) + np.sin(2*np.pi*x/20) for x in range(1, 131)] +\
-                    [np.sin(2*np.pi*x/10) + np.sin(2*np.pi*x/50) for x in range(1, 131)] +\
-                    [np.sin(2*np.pi*x/5) + np.sin(2*np.pi*x/20) for x in range(1, 131)])
-
-    data = pd.read_csv(path, header=None)
+    ext = os.path.splitext(path)[1][1:]
+    
+    if ext == "csv":
+        data = pd.read_csv(path, header=None)
+    elif ext == "wav":
+        raise(Exception(".wav does not implemented"))
+    else:
+        raise(Exception("Unexpected extension"))
 
     return data.values.reshape(len(data))
 
