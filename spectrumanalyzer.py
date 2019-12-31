@@ -18,6 +18,16 @@ def read_data(path, sr):
 
     return data.values.reshape(len(data))
 
+def calc_fft(data, sr):
+    fft = np.fft.fft(data)
+    freq = np.fft.fftfreq(data.shape[0], d=1/sr)
+
+    fft = np.array(fft[0 <= freq])
+    freq = np.array(freq[0 <= freq])
+
+    return fft, freq
+
+
 def plot_spec(i, data, sr, windowtype, windowsize, axes):
     """
     data: series, spectrum data
@@ -34,19 +44,15 @@ def plot_spec(i, data, sr, windowtype, windowsize, axes):
     axes[0].cla()
     axes[1].cla()
 
-    temp = window_func(windowsize) * data[i:i+windowsize]
+    data_windowed = window_func(windowsize) * data[i:i+windowsize]
 
-    fft_temp = np.fft.fft(temp)
-    freq = np.fft.fftfreq(temp.shape[0], d=1/sr)
-
-    fft_temp = np.array(fft_temp[0 <= freq])
-    freq = np.array(freq[0 <= freq])
-
-    axes[0].plot(temp)
-    axes[1].plot(freq, np.sqrt(fft_temp.real**2 + fft_temp.imag**2))
+    fft, freq = calc_fft(data_windowed, sr)
+    
+    axes[0].plot(data_windowed)
+    axes[1].plot(freq, np.abs(fft))
     axes[0].set_title('i=' + str(i))
 
-    return freq, fft_temp
+    return freq, fft
 
 def main(args):
     path = args.filepath
