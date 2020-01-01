@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-#import librosa
+import librosa
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.patches as patches
@@ -12,12 +12,11 @@ def read_data(path, sr):
     
     if ext == "csv":
         data = pd.read_csv(path, header=None)
+        return data.values.reshape(len(data)), sr
     elif ext == "wav":
-        raise(Exception(".wav does not implemented"))
+        return librosa.load(path, sr=None)
     else:
         raise(Exception("Unexpected extension"))
-
-    return data.values.reshape(len(data))
 
 def calc_fft(data, sr):
     fft = np.fft.fft(data)
@@ -28,7 +27,7 @@ def calc_fft(data, sr):
 
     return fft, freq
 
-def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber):
+def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber, hzrange):
     """
     data: series, spectrum data
     """
@@ -42,12 +41,12 @@ def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber):
     axes[1].cla()
     axes[2].cla()
 
-    axes[0].set_title('i=' + str(i))
+    #axes[0].set_title('i=' + str(i))
     axes[0].plot(data, zorder=1)
 
-    r = patches.Rectangle(xy=(int(np.floor(i*sr/framenumber)), 0),
+    r = patches.Rectangle(xy=(int(np.floor(i*sr/framenumber)), -data.max()),
                           width=windowsize,
-                          height=data.max(),
+                          height=2 * data.max(),
                           ec="red",
                           fill=False,
                           zorder=2)
@@ -56,8 +55,9 @@ def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber):
     axes[1].plot(data_windowed)
     
     axes[2].plot(freq, np.abs(fft))
+    axes[2].set_xlim(hzrange)
     
-    return freq, fft
+    return axes
 
 def main(args):
     path = args.filepath
@@ -69,8 +69,9 @@ def main(args):
         windowtype = args.windowtype
         windowsize = args.windowsize
         framenumber = args.framenumber
+        hzrange = args.hzrange
 
-    data = read_data(path, sr)
+    data, sr = read_data(path, sr)
 
     window_dict = {
         "hamming":np.hamming,
@@ -85,7 +86,7 @@ def main(args):
     fig, axes = plt.subplots(3, 1, figsize=[8, 8])
     ani = animation.FuncAnimation(fig,
                                   plot_spec,
-                                  fargs = (data, sr, window_func, windowsize, axes, framenumber),
+                                  fargs = (data, sr, window_func, windowsize, axes, framenumber, hzrange),
                                   interval=int(np.floor(1000/framenumber)),
                                   frames=int(np.floor((N-windowsize)*framenumber/sr)))
     
@@ -111,16 +112,21 @@ if __name__ == "__main__":
                         type=int,
                         default=5512,
                         help="window size. default=100")
+    parser.add_argument("--hzrange",
+                        type=int,
+                        nargs=2,
+                        default=[0, 10000],
+                        help="Hz range. default=[0,10000]. choose start and end. example '--hzrange 100 1000'")
+    parser.add_argument("--framenumber",
+                        type=int,
+                        default=8,
+                        help="frame number of animation. default=8")
     parser.add_argument("--usesettings",
                         action='store_true', 
                         help="use saved setting file")
     parser.add_argument("--savesettings",
                         action='store_true',
                         help="save settings to file")
-    parser.add_argument("--framenumber",
-                        type=int,
-                        default=8,
-                        help="frame number of animation. default=8")
     
     args = parser.parse_args()
 
