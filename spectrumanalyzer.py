@@ -7,11 +7,12 @@ import matplotlib.patches as patches
 
 import sys, os, argparse
 
-def read_data(path, sr):
+def read_data(path, sr, csvskiprows, csvcolposition):
     ext = os.path.splitext(path)[1][1:]
     
     if ext == "csv":
-        data = pd.read_csv(path, header=None)
+        data = pd.read_csv(path, header=None, skiprows=csvskiprows, usecols=[csvcolposition])
+        print("read data is :", data.values.reshape(len(data)))
         return data.values.reshape(len(data)), sr
     elif ext == "wav":
         return librosa.load(path, sr=None)
@@ -70,8 +71,10 @@ def main(args):
         windowsize = args.windowsize
         framenumber = args.framenumber
         hzrange = args.hzrange
+        csvskiprows = args.csvskiprows
+        csvcolposition = args.csvcolposition
 
-    data, sr = read_data(path, sr)
+    data, sr = read_data(path, sr, csvskiprows, csvcolposition)
 
     window_dict = {
         "hamming":np.hamming,
@@ -121,6 +124,14 @@ if __name__ == "__main__":
                         type=int,
                         default=8,
                         help="frame number of animation. default=8")
+    parser.add_argument("--csvskiprows",
+                        type=int,
+                        default=0,
+                        help="csv skip rows. default=0")                    
+    parser.add_argument("--csvcolposition",
+                        type=int,
+                        default=0,
+                        help="csv column position. default=0")                    
     parser.add_argument("--usesettings",
                         action='store_true', 
                         help="use saved setting file")
