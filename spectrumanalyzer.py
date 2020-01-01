@@ -89,13 +89,16 @@ def main(args):
                                   interval=int(np.floor(1000/framenumber)),
                                   frames=int(np.floor((N-windowsize)*framenumber/sr)))
     
-    ani.save("temp.mp4",writer='ffmpeg')
+    ani.save("{}".format(args.savefilepath),writer='ffmpeg')
     #plt.show()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="spectrum analyzer")
     parser.add_argument("filepath",
                         help=".wav or .csv file")
+    parser.add_argument("--savefilepath",
+                        default="./output.mp4",
+                        help="filepath of output mp4 file. default=./output.mp4")
     parser.add_argument("--sr",
                         type=int,
                         default=44100,
