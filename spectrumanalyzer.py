@@ -23,8 +23,8 @@ def calc_fft(data, sr):
     fft = np.fft.fft(data)
     freq = np.fft.fftfreq(data.shape[0], d=1/sr)
 
-    fft = np.array(fft[0 <= freq])
-    freq = np.array(freq[0 <= freq])
+    fft = np.array(fft[0 < freq])
+    freq = np.array(freq[0 < freq])
 
     return fft, freq
 
@@ -34,7 +34,8 @@ def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber, hzrange):
     """
 
     data_windowed = window_func(windowsize) * \
-                    data[int(np.floor(i*sr/framenumber)):int(np.floor(i*sr/framenumber))+windowsize]
+                    (data[int(np.floor(i*sr/framenumber)):int(np.floor(i*sr/framenumber))+windowsize] -\
+                     data[int(np.floor(i*sr/framenumber)):int(np.floor(i*sr/framenumber))+windowsize].mean())
 
     fft, freq = calc_fft(data_windowed, sr)
     
@@ -45,9 +46,9 @@ def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber, hzrange):
     #axes[0].set_title('i=' + str(i))
     axes[0].plot(data, zorder=1)
 
-    r = patches.Rectangle(xy=(int(np.floor(i*sr/framenumber)), -data.max()),
+    r = patches.Rectangle(xy=(int(np.floor(i*sr/framenumber)), data.min()),
                           width=windowsize,
-                          height=2 * data.max(),
+                          height=data.max() - data.min(),
                           ec="red",
                           fill=False,
                           zorder=2)
