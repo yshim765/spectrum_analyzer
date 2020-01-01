@@ -9,4 +9,4 @@ Spectrum analyzer
 * mp4 で出力
 
 output image
-[](https://github.com/yshim765/spectrum_analyzer/output_image.jpg)
+![output image](https://github.com/yshim765/spectrum_analyzer/output_image.jpg)
