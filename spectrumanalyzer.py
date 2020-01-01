@@ -23,12 +23,12 @@ def calc_fft(data, sr):
     fft = np.fft.fft(data)
     freq = np.fft.fftfreq(data.shape[0], d=1/sr)
 
-    fft = np.array(fft[0 < freq])
-    freq = np.array(freq[0 < freq])
+    fft = np.array(fft[0 <= freq])
+    freq = np.array(freq[0 <= freq])
 
     return fft, freq
 
-def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber, hzrange):
+def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber, hzrange, fftyrange):
     """
     data: series, spectrum data
     """
@@ -58,6 +58,8 @@ def plot_spec(i, data, sr, window_func, windowsize, axes, framenumber, hzrange):
     
     axes[2].plot(freq, np.abs(fft))
     axes[2].set_xlim(hzrange)
+    if fftyrange:
+        axes[2].set_ylim(fftyrange)
     
     return axes
 
@@ -74,6 +76,7 @@ def main(args):
         hzrange = args.hzrange
         csvskiprows = args.csvskiprows
         csvcolposition = args.csvcolposition
+        fftyrange = args.fftyrange
 
     data, sr = read_data(path, sr, csvskiprows, csvcolposition)
 
@@ -90,7 +93,7 @@ def main(args):
     fig, axes = plt.subplots(3, 1, figsize=[8, 8])
     ani = animation.FuncAnimation(fig,
                                   plot_spec,
-                                  fargs = (data, sr, window_func, windowsize, axes, framenumber, hzrange),
+                                  fargs = (data, sr, window_func, windowsize, axes, framenumber, hzrange, fftyrange),
                                   interval=int(np.floor(1000/framenumber)),
                                   frames=int(np.floor((N-windowsize)*framenumber/sr)))
     
@@ -121,6 +124,11 @@ if __name__ == "__main__":
                         nargs=2,
                         default=[0, 10000],
                         help="Hz range. default=[0,10000]. choose start and end. example '--hzrange 100 1000'")
+    parser.add_argument("--fftyrange",
+                        type=int,
+                        nargs=2,
+                        default=None,
+                        help="fft y axis range. default=None. choose start and end. example '--fftyrange 100 1000'")
     parser.add_argument("--framenumber",
                         type=int,
                         default=8,
