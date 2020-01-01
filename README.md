@@ -7,3 +7,6 @@ Spectrum analyzer
 
 * 直流成分は除去（平均値を引いている）
 * mp4 で出力
+
+output image
+[](https://github.com/yshim765/spectrum_analyzer/output_image.jpg)
