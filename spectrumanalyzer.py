@@ -67,7 +67,8 @@ def main(args):
     path = args.filepath
     
     if args.usesettings:
-        raise(Exception("usesettings is not implemented"))
+        with open("settings", "rb") as f:
+                sr, windowtype, windowsize, framenumber, hzrange, csvskiprows, csvcolposition, fftyrange = pickle.load(f)
     else:
         sr = args.sr
         windowtype = args.windowtype
