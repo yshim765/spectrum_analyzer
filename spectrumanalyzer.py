@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.patches as patches
 
-import sys, os, argparse
+import sys, os, argparse, pickle
 
 def read_data(path, sr, csvskiprows, csvcolposition):
     ext = os.path.splitext(path)[1][1:]
@@ -67,7 +67,7 @@ def main(args):
     path = args.filepath
     
     if args.usesettings:
-        pass
+        raise(Exception("usesettings is not implemented"))
     else:
         sr = args.sr
         windowtype = args.windowtype
@@ -77,6 +77,10 @@ def main(args):
         csvskiprows = args.csvskiprows
         csvcolposition = args.csvcolposition
         fftyrange = args.fftyrange
+    
+        if args.savesettings:
+            with open("settings", "wb") as f:
+                pickle.dump((sr, windowtype, windowsize, framenumber, hzrange, csvskiprows, csvcolposition, fftyrange), f)
 
     data, sr = read_data(path, sr, csvskiprows, csvcolposition)
 
@@ -97,7 +101,7 @@ def main(args):
                                   interval=int(np.floor(1000/framenumber)),
                                   frames=int(np.floor((N-windowsize)*framenumber/sr)))
     
-    ani.save("{}".format(args.savefilepath),writer='ffmpeg')
+    ani.save("{}".format(args.savefilepath), writer='ffmpeg')
     #plt.show()
 
 if __name__ == "__main__":
