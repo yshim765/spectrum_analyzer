@@ -7,6 +7,11 @@ import matplotlib.patches as patches
 
 import sys, os, argparse, pickle
 
+class Options():
+    def __init__(self, args):
+        self.savefilepath = args.savefilepath
+        
+
 def read_data(path, sr, csvskiprows, csvcolposition):
     ext = os.path.splitext(path)[1][1:]
     
