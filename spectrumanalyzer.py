@@ -67,7 +67,8 @@ def main(args):
     path = args.filepath
     
     if args.usesettings:
-        raise(Exception("usesettings is not implemented"))
+        with open("settings", "rb") as f:
+                sr, windowtype, windowsize, framenumber, hzrange, csvskiprows, csvcolposition, fftyrange, playspeed = pickle.load(f)
     else:
         sr = args.sr
         windowtype = args.windowtype
@@ -77,10 +78,11 @@ def main(args):
         csvskiprows = args.csvskiprows
         csvcolposition = args.csvcolposition
         fftyrange = args.fftyrange
+        playspeed = args.playspeed
     
         if args.savesettings:
             with open("settings", "wb") as f:
-                pickle.dump((sr, windowtype, windowsize, framenumber, hzrange, csvskiprows, csvcolposition, fftyrange), f)
+                pickle.dump((sr, windowtype, windowsize, framenumber, hzrange, csvskiprows, csvcolposition, fftyrange, playspeed), f)
 
     data, sr = read_data(path, sr, csvskiprows, csvcolposition)
 
@@ -98,7 +100,7 @@ def main(args):
     ani = animation.FuncAnimation(fig,
                                   plot_spec,
                                   fargs = (data, sr, window_func, windowsize, axes, framenumber, hzrange, fftyrange),
-                                  interval=int(np.floor(1000/framenumber)),
+                                  interval=int(np.floor(1000/(framenumber*playspeed))),
                                   frames=int(np.floor((N-windowsize)*framenumber/sr)))
     
     ani.save("{}".format(args.savefilepath), writer='ffmpeg')
@@ -144,7 +146,11 @@ if __name__ == "__main__":
     parser.add_argument("--csvcolposition",
                         type=int,
                         default=0,
-                        help="csv column position. default=0")                    
+                        help="csv column position. default=0")
+    parser.add_argument("--playspeed",
+                        type=float,
+                        default=1,
+                        help="video play speed")
     parser.add_argument("--usesettings",
                         action='store_true', 
                         help="use saved setting file")
